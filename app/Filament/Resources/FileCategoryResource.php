@@ -81,4 +81,9 @@ class FileCategoryResource extends Resource
             'edit' => Pages\EditFileCategory::route('/{record}/edit'),
         ];
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count('name');
+    }
 }

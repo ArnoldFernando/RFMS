@@ -4,16 +4,19 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FileResource\Pages;
 use App\Models\File;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -21,11 +24,25 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FileResource extends Resource
 {
     protected static ?string $model = File::class;
     protected static ?string $navigationIcon = 'heroicon-o-document';
+
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'pending')->count();
+    }
+
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Pending files';
+    }
 
     public static function form(Forms\Form $form): Forms\Form
     {
@@ -53,11 +70,11 @@ class FileResource extends Resource
 
                         TextInput::make('civil_case_number')
                             ->required()
-                            ->columnSpan(4), // 1/3 of the row
+                            ->columnSpan(6), // 1/3 of the row
 
                         TextInput::make('lot_number')
                             ->required()
-                            ->columnSpan(4), // 1/3 of the row
+                            ->columnSpan(6), // 1/3 of the row
 
                         Select::make('status')
                             ->options([
@@ -67,17 +84,14 @@ class FileResource extends Resource
                                 'deleted' => 'Deleted',
                             ])
                             ->default('pending')
-                            ->columnSpan(4), // 1/3 of the row
+                            ->columnSpan(6), // 1/3 of the row
 
                         Select::make('file_category_id')
                             ->relationship('category', 'name')
                             ->required()
                             ->columnSpan(6), // Half-width
 
-                        Select::make('user_id')
-                            ->relationship('user', 'name')
-                            ->required()
-                            ->columnSpan(6), // Half-width
+                        Hidden::make('user_id')->default(Auth::id()), // Half-width
                     ])
                 ]),
             ]);
@@ -109,7 +123,22 @@ class FileResource extends Resource
                     ->label('Category'),
             ])
             ->actions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->modalHeading('File Details')
+                    ->modalWidth('xl')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->extraModalFooterActions([
+                        EditAction::make()->label('Edit')->icon('heroicon-o-pencil')->color('primary'),
+                    ]),
+                Action::make('Download')
+                    ->color('success')
+                    ->url(fn($record) => route('files.download', $record->id)) // Use route for downloading
+                    ->openUrlInNewTab(), // Call download function
+
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -129,5 +158,20 @@ class FileResource extends Resource
             'create' => Pages\CreateFile::route('/create'),
             'edit' => Pages\EditFile::route('/{record}/edit'),
         ];
+    }
+
+    public static function downloadFile($record): StreamedResponse
+    {
+        $filePath = 'files/' . $record->file; // Adjust path if needed
+
+        if (!Storage::disk('public')->exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        // Get file extension and set correct filename
+        $fileExtension = pathinfo($record->file, PATHINFO_EXTENSION);
+        $fileName = $record->file_name . '.' . $fileExtension; // Preserve extension
+
+        return response()->download(storage_path("app/public/{$filePath}"), $fileName);
     }
 }
