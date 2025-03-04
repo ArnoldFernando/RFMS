@@ -18,18 +18,20 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class StaffPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('staff')
+            ->path('staff')
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->middleware(['auth', 'admin']); // Uses auth middleware, no separate login
-
+            ->authMiddleware([Authenticate::class])
+            ->login( // ✅ Enables shared login form
+                fn(Panel $panel) => $panel->getLoginForm()
+                    ->action(route('custom.login')) // ✅ Uses custom login route
+            );
     }
 }

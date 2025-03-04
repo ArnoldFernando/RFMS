@@ -105,7 +105,18 @@ class FileResource extends Resource
                 TextColumn::make('location')->sortable()->searchable(),
                 TextColumn::make('civil_case_number')->sortable()->searchable(),
                 TextColumn::make('lot_number')->sortable()->searchable(),
-                TextColumn::make('status')->badge()->sortable()->searchable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'pending' => 'warning',     // Yellow for pending
+                        'approved' => 'success',    // Green for approved
+                        'rejected' => 'danger',     // Red for rejected
+                        'deleted' => 'gray',        // Gray for deleted
+                        default => 'secondary',
+                    })
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('category.name')->label('Category'), // ✅ Removed searchable()
                 TextColumn::make('user.name')->label('Uploaded By'),  // ✅ Removed searchable()
                 TextColumn::make('created_at')->dateTime()->sortable(),
@@ -133,12 +144,10 @@ class FileResource extends Resource
                         EditAction::make()->label('Edit')->icon('heroicon-o-pencil')->color('primary'),
                     ]),
                 Action::make('Download')
-                    ->color('success')
-                    ->url(fn($record) => route('files.download', $record->id)) // Use route for downloading
-                    ->openUrlInNewTab(), // Call download function
 
-                Tables\Actions\ForceDeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
+                    ->color('success')
+                    ->url(fn($record) => asset('storage/' . $record->file)) // Assumes files are stored in `storage/app/public/files`
+                    ->openUrlInNewTab(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -158,20 +167,5 @@ class FileResource extends Resource
             'create' => Pages\CreateFile::route('/create'),
             'edit' => Pages\EditFile::route('/{record}/edit'),
         ];
-    }
-
-    public static function downloadFile($record): StreamedResponse
-    {
-        $filePath = 'files/' . $record->file; // Adjust path if needed
-
-        if (!Storage::disk('public')->exists($filePath)) {
-            return back()->with('error', 'File not found.');
-        }
-
-        // Get file extension and set correct filename
-        $fileExtension = pathinfo($record->file, PATHINFO_EXTENSION);
-        $fileName = $record->file_name . '.' . $fileExtension; // Preserve extension
-
-        return response()->download(storage_path("app/public/{$filePath}"), $fileName);
     }
 }
