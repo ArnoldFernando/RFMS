@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FileResource\Pages;
+use App\Filament\Widgets\StatusSummary;
 use App\Models\File;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -32,6 +33,12 @@ class FileResource extends Resource
     protected static ?string $model = File::class;
     protected static ?string $navigationIcon = 'heroicon-o-document';
 
+    // public static function getWidgets(): array
+    // {
+    //     return [
+    //         StatusSummary::class,
+    //     ];
+    // }
 
     public static function getNavigationBadge(): ?string
     {
