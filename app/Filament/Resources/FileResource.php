@@ -21,11 +21,13 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
 class FileResource extends Resource
@@ -112,17 +114,25 @@ class FileResource extends Resource
                 TextColumn::make('location')->sortable()->searchable(),
                 TextColumn::make('civil_case_number')->sortable()->searchable(),
                 TextColumn::make('lot_number')->sortable()->searchable(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->color(fn($state) => match ($state) {
-                        'pending' => 'warning',     // Yellow for pending
-                        'approved' => 'success',    // Green for approved
-                        'rejected' => 'danger',     // Red for rejected
-                        'deleted' => 'gray',        // Gray for deleted
+                IconColumn::make('status')
+                    ->size(IconColumn\IconColumnSize::Medium)
+                    ->icon(fn(string $state): string => match ($state) {
+                        'pending' => 'heroicon-o-pencil',
+                        'approved' => 'heroicon-o-clock',
+                        'rejected' => 'heroicon-o-x-circle',
+                        'deleted' => 'heroicon-o-trash',
+                    })
+                    ->color(fn(string $state): string => match ($state) {
+                        'pending' => 'warning',  // Yellow
+                        'approved' => 'success', // Green
+                        'rejected' => 'danger',  // Red
+                        'deleted' => 'gray',     // Gray
                         default => 'secondary',
                     })
+                    ->alignCenter() // Align the icon to the right
                     ->sortable()
                     ->searchable(),
+
 
                 TextColumn::make('category.name')->label('Category'), // ✅ Removed searchable()
                 TextColumn::make('user.name')->label('Uploaded By'),  // ✅ Removed searchable()
@@ -151,16 +161,20 @@ class FileResource extends Resource
                         EditAction::make()->label('Edit')->icon('heroicon-o-pencil')->color('primary'),
                     ]),
                 Action::make('Download')
-
+                    ->label('Save')
+                    ->icon('heroicon-o-arrow-down')
+                    ->url(fn($record) => route('file.download', $record->id), true) // Uses the new route
                     ->color('success')
-                    ->url(fn($record) => asset('storage/' . $record->file)) // Assumes files are stored in `storage/app/public/files`
                     ->openUrlInNewTab(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
             ->defaultSort('created_at', 'desc') // Ensures recent files appear first
-            ->searchPlaceholder('Search files...');
+            ->searchPlaceholder('Search files...')
+            ->defaultPaginationPageOption(5);
     }
+
+
 
     public static function getRelations(): array
     {

@@ -1,6 +1,8 @@
 <?php
 
+
 use App\Models\File;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,17 +22,16 @@ Route::get('/', function () {
 });
 
 
-Route::get('/files/download/{id}', function ($id) {
-    $record = \App\Models\File::findOrFail($id);
+Route::get('/download/{id}', function ($id) {
+    $record = File::findOrFail($id);
 
-    $filePath = asset('storage/files/' . $record->file); // Correct path
+    $originalPath = public_path('storage/' . $record->file); // File location
+    $fileExtension = pathinfo($originalPath, PATHINFO_EXTENSION); // Get file extension
+    $newFileName = $record->file_name . '.' . $fileExtension; // Rename file
 
-    if (!file_exists($filePath)) {
+    if (file_exists($originalPath)) {
+        return Response::download($originalPath, $newFileName);
+    } else {
         abort(404, 'File not found.');
     }
-
-    $fileExtension = pathinfo($record->file, PATHINFO_EXTENSION);
-    $fileName = $record->file_name . '.' . $fileExtension; // Keep original extension
-
-    return response()->download($filePath, $fileName);
-})->name('files.download');
+})->name('file.download');
