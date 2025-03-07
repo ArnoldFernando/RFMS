@@ -22,8 +22,24 @@ class Deleted extends Page implements HasTable
     use InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-trash';
+    protected static ?string $navigationColor = 'gray';
     protected static string $view = 'filament.pages.deleted';
     protected static ?string $navigationGroup = 'File Status';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return File::where('status', 'deleted')->count();
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'gray'; // Yellow badge
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Deleted files';
+    }
 
     public function table(Table $table): Table
     {
@@ -102,6 +118,7 @@ class Deleted extends Page implements HasTable
 
             ->defaultSort('created_at', 'desc') // Ensures recent files appear first
             ->searchPlaceholder('Search files...')
-            ->paginated(10);
+            ->paginated(10)
+            ->defaultPaginationPageOption(5);
     }
 }

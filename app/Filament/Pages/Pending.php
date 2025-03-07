@@ -13,8 +13,24 @@ class Pending extends Page implements Tables\Contracts\HasTable
     use Tables\Concerns\InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?string $navigationIconColor = 'primary';
     protected static string $view = 'filament.pages.pending';
     protected static ?string $navigationGroup = 'File Status';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return File::where('status', 'pending')->count();
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning'; // Yellow badge
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Pending files';
+    }
 
     // Define the table with only pending files
     public function table(Table $table): Table
@@ -30,6 +46,7 @@ class Pending extends Page implements Tables\Contracts\HasTable
                 TextColumn::make('user_id')->label('Uploaded By')->sortable(),
                 TextColumn::make('created_at')->label('Uploaded At')->dateTime()->sortable(),
             ])
-            ->paginated(10);
+            ->paginated(10)
+            ->defaultPaginationPageOption(5);
     }
 }

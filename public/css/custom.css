@@ -1,0 +1,3 @@
+.fi-sidebar-item[href*="pending"] .fi-icon {
+    color: red !important; /* Change to your preferred color */
+}
