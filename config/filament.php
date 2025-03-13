@@ -30,6 +30,14 @@ return [
 
     ],
 
+    'auth' => [
+        'guard' => 'web', // or your custom guard
+        'pages' => [
+            'login' => \Filament\Http\Livewire\Auth\Login::class,
+        ],
+    ],
+
+
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
@@ -70,5 +78,9 @@ return [
     */
 
     'livewire_loading_delay' => 'default',
+
+
+    'path' => env('FILAMENT_PATH', 'admin'),
+    'force_https' => true, // Add this line
 
 ];
