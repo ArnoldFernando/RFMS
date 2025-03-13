@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Rejected;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationItem;
 
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
@@ -21,6 +23,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Njxqlus\FilamentProgressbar\FilamentProgressbarPlugin;
+use App\Filament\Pages\Settings;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->plugin(FilamentProgressbarPlugin::make()->color('red'))
+            // ->topNavigation()
             ->default()
             ->id('admin')
             ->path('admin')
@@ -35,6 +41,13 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            // ->userMenuItems([
+            //     MenuItem::make()
+            //         ->label('Settings')
+            //         ->url(fn(): string => Rejected::getUrl())
+            //         ->icon('heroicon-o-cog-6-tooth'),
+            //     // ...
+            // ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')

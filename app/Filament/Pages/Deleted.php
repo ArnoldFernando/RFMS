@@ -81,7 +81,7 @@ class Deleted extends Page implements HasTable
 
 
                 EditAction::make()
-                    ->label('Edit')
+                    ->label('Update')
                     ->icon('heroicon-o-pencil')
                     ->modalHeading('Edit File')
                     ->modalWidth('xl')
@@ -92,9 +92,10 @@ class Deleted extends Page implements HasTable
                         Select::make('status')
                             ->label('Status')
                             ->options([
+                                'approved' => 'approved',
                                 'pending' => 'pending',
                                 'deleted' => 'deleted',
-
+                                'rejected' => 'rejected',
                             ])
                             ->required(),
                     ])

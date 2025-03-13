@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('file_name');
             $table->string('location');
-            $table->text('description');
-            $table->text('file');
-            $table->string('civil_case_number');
-            $table->string('lot_number');
+            $table->text('description')->nullable();
+            $table->text('file')->nullable();
+            $table->string('civil_case_number')->nullable();
+            $table->string('lot_number')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected', 'deleted'])->default('pending');
             $table->foreignId('file_category_id')->constrained();
             $table->foreignId('user_id')->constrained();

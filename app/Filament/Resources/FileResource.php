@@ -71,18 +71,20 @@ class FileResource extends Resource
 
                         FileUpload::make('file')
                             ->directory('files')
-                            ->required()
+                            ->preserveFilenames() // Keep the original filename
+                            ->nullable() // Make the file upload nullable
                             ->columnSpanFull(), // Full-width
+
 
                         Textarea::make('description')
                             ->columnSpanFull(), // Full-width
 
                         TextInput::make('civil_case_number')
-                            ->required()
+                            ->nullable()
                             ->columnSpan(6), // 1/3 of the row
 
                         TextInput::make('lot_number')
-                            ->required()
+                            ->nullable()
                             ->columnSpan(6), // 1/3 of the row
 
                         Select::make('status')
