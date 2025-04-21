@@ -5,5 +5,5 @@
     <div>
         @livewire(\App\Filament\Widgets\StatusOverview::class)
     </div>  --}}
-    test
+
 </x-filament-panels::page>
