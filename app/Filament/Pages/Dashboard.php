@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\DashboardChart;
 use App\Filament\Widgets\StatusOverview;
 use Filament\Pages\Page;
 
@@ -18,6 +19,7 @@ class Dashboard extends Page
     {
         return [
             StatusOverview::class,
+            DashboardChart::class,
         ];
     }
 }
